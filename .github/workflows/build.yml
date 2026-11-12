@@ -35,8 +35,8 @@ jobs:
         run: npm run build
 
       - name: Package Windows x64 installer
-        # -c.win.target=nsis 覆盖 package.json 里的三架构列表，只出一个 x64 包
-        run: npx electron-builder --win --x64 -c.win.target=nsis --publish never
+        # package.json 的 win.target 已收成单个 nsis，配合 --x64 只出一个包
+        run: npx electron-builder --win --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
