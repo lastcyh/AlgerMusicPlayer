@@ -83,13 +83,13 @@ export default {
     },
     vipBorrow: {
       section: 'VIP source borrowing',
-      enableTitle: 'Enable VIP source borrowing',
+      enableTitle: 'VIP account fallback',
       enableDesc:
-        'When the main account cannot get a playable URL, resolve it once with the stored VIP token. Playlists, likes and daily recommendations still use the main account',
+        'When the main account gets no playable URL, resolve once more with the stored VIP account through the official API. Order: main account → VIP account → music sources below',
       statusUnset: 'No VIP token bound',
       statusConnected: 'Bound: {name} ({level})',
       statusInvalid: 'Token expired, please bind again',
-      statusOff: 'Disabled, no borrow request will be sent',
+      statusOff: 'Disabled, no fallback request is sent',
       bind: 'Bind token',
       rebind: 'Change token',
       verify: 'Verify',
@@ -97,9 +97,9 @@ export default {
       verifySuccess: 'Token valid: {name} ({level})',
       verifyFailed: 'Token verification failed, it may have expired',
       cleared: 'VIP borrowing token cleared',
-      upgrade: 'Also borrow to upgrade normal tracks',
+      upgrade: 'Also fallback when bitrate is lower',
       upgradeDesc:
-        'When the main account returns a lower bitrate than the selected quality, resolve again with the VIP token (one extra request)',
+        'When the main account returns a lower bitrate than the quality above, resolve again with the VIP account (one extra request)',
       modalTitle: 'Bind VIP borrowing token',
       modalDesc:
         'Copy the cookie from a logged-in NetEase Cloud Music client or browser and paste it below. It is stored only in this device browser storage',

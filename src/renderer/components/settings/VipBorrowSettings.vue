@@ -14,7 +14,6 @@ import {
 } from '@/utils/vipBorrow';
 import SBtn from '@/views/set/SBtn.vue';
 import SettingItem from '@/views/set/SettingItem.vue';
-import SettingSection from '@/views/set/SettingSection.vue';
 
 defineOptions({
   name: 'VipBorrowSettings'
@@ -32,7 +31,9 @@ const levelLabel = computed(() =>
 );
 
 const bindLabel = computed(() =>
-  config.value.cookie ? t('settings.playback.vipBorrow.rebind') : t('settings.playback.vipBorrow.bind')
+  config.value.cookie
+    ? t('settings.playback.vipBorrow.rebind')
+    : t('settings.playback.vipBorrow.bind')
 );
 
 const statusText = computed(() => {
@@ -56,10 +57,6 @@ const statusClass = computed(() => {
 
 const handleToggle = (value: boolean) => {
   saveVipBorrow({ enabled: value });
-};
-
-const handleUpgradeToggle = (value: boolean) => {
-  saveVipBorrow({ useForNormalTracks: value });
 };
 
 const handleVerify = async () => {
@@ -99,48 +96,43 @@ const handleClear = () => {
   clearVipBorrow();
   message.success(t('settings.playback.vipBorrow.cleared'));
 };
+
+const handleUpgradeToggle = (value: boolean) => {
+  saveVipBorrow({ useForNormalTracks: value });
+};
 </script>
 
 <template>
-  <setting-section :title="t('settings.playback.vipBorrow.section')">
-    <setting-item :title="t('settings.playback.vipBorrow.enableTitle')">
-      <template #description>
-        <div class="space-y-1">
-          <div>{{ t('settings.playback.vipBorrow.enableDesc') }}</div>
-          <div class="text-xs" :class="statusClass">{{ statusText }}</div>
-        </div>
-      </template>
-      <template #action>
-        <div class="flex items-center gap-2 max-md:w-full max-md:flex-wrap max-md:justify-end">
-          <SBtn :variant="config.cookie ? 'default' : 'primary'" @click="showModal = true">
-            {{ bindLabel }}
-          </SBtn>
-          <SBtn v-if="config.cookie" :loading="verifying" @click="handleVerify">
-            {{ t('settings.playback.vipBorrow.verify') }}
-          </SBtn>
-          <SBtn v-if="config.cookie" variant="danger" @click="handleClear">
-            {{ t('settings.playback.vipBorrow.clear') }}
-          </SBtn>
-          <n-switch
-            :value="config.enabled"
-            :disabled="!config.cookie"
-            @update:value="handleToggle"
-          />
-        </div>
-      </template>
-    </setting-item>
+  <setting-item :title="t('settings.playback.vipBorrow.enableTitle')">
+    <template #description>
+      <div class="space-y-1">
+        <div>{{ t('settings.playback.vipBorrow.enableDesc') }}</div>
+        <div class="text-xs" :class="statusClass">{{ statusText }}</div>
+      </div>
+    </template>
+    <template #action>
+      <div class="flex items-center gap-2 max-md:w-full max-md:flex-wrap max-md:justify-end">
+        <SBtn :variant="config.cookie ? 'default' : 'primary'" @click="showModal = true">
+          {{ bindLabel }}
+        </SBtn>
+        <SBtn v-if="config.cookie" :loading="verifying" @click="handleVerify">
+          {{ t('settings.playback.vipBorrow.verify') }}
+        </SBtn>
+        <SBtn v-if="config.cookie" variant="danger" @click="handleClear">
+          {{ t('settings.playback.vipBorrow.clear') }}
+        </SBtn>
+        <n-switch :value="config.enabled" :disabled="!config.cookie" @update:value="handleToggle" />
+      </div>
+    </template>
+  </setting-item>
 
-    <setting-item
-      :title="t('settings.playback.vipBorrow.upgrade')"
-      :description="t('settings.playback.vipBorrow.upgradeDesc')"
-    >
-      <n-switch
-        :value="config.useForNormalTracks"
-        :disabled="!config.enabled"
-        @update:value="handleUpgradeToggle"
-      />
-    </setting-item>
+  <setting-item
+    v-if="config.cookie && config.enabled"
+    :title="t('settings.playback.vipBorrow.upgrade')"
+    :description="t('settings.playback.vipBorrow.upgradeDesc')"
+  >
+    <n-switch :value="config.useForNormalTracks" @update:value="handleUpgradeToggle" />
+  </setting-item>
 
-    <vip-borrow-modal v-model:show="showModal" />
-  </setting-section>
+  <vip-borrow-modal v-model:show="showModal" />
 </template>

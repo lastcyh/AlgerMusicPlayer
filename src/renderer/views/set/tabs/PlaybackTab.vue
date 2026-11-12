@@ -12,6 +12,8 @@
         />
       </setting-item>
 
+      <vip-borrow-settings />
+
       <setting-item v-if="isElectron" :title="t('settings.playback.musicSources')">
         <template #description>
           <div class="flex items-center gap-2">
@@ -84,8 +86,6 @@
         <audio-device-settings />
       </setting-item>
     </setting-section>
-
-    <vip-borrow-settings />
 
     <div
       class="mt-6 p-4 rounded-2xl bg-white dark:bg-neutral-900 border border-gray-100 dark:border-gray-800"

@@ -83,13 +83,13 @@ export default {
     },
     vipBorrow: {
       section: 'VIP 음원 차용',
-      enableTitle: 'VIP 음원 차용 사용',
+      enableTitle: 'VIP 계정으로 보완',
       enableDesc:
-        '메인 계정으로 재생 주소를 받을 수 없을 때만 저장된 VIP 토큰으로 다시 받아옵니다. 플레이리스트·좋아요·일일 추천은 메인 계정을 그대로 사용합니다',
+        '메인 계정으로 재생 주소를 받을 수 없을 때만 저장된 VIP 계정으로 공식 API에서 다시 받아옵니다. 우선순위: 메인 → VIP → 아래 음원 설정',
       statusUnset: 'VIP 토큰이 등록되지 않았습니다',
       statusConnected: '등록됨: {name}({level})',
       statusInvalid: '토큰이 만료되었습니다. 다시 등록해 주세요',
-      statusOff: '꺼져 있어 차용 요청을 보내지 않습니다',
+      statusOff: '꺼져 있어 보완 요청을 보내지 않습니다',
       bind: '토큰 등록',
       rebind: '토큰 변경',
       verify: '확인',
@@ -97,9 +97,9 @@ export default {
       verifySuccess: '토큰이 유효합니다: {name}({level})',
       verifyFailed: '토큰 확인에 실패했습니다. 만료되었을 수 있습니다',
       cleared: 'VIP 차용 토큰을 삭제했습니다',
-      upgrade: '일반 곡도 차용해 비트레이트 올리기',
+      upgrade: '음질이 부족할 때도 보완',
       upgradeDesc:
-        '메인 계정의 비트레이트가 설정 음질보다 낮으면 VIP 토큰으로 다시 받아옵니다(요청 1회 추가)',
+        '메인 계정의 비트레이트가 위 음질 설정보다 낮으면 VIP 계정으로 다시 받아옵니다(요청 1회 추가)',
       modalTitle: 'VIP 차용 토큰 등록',
       modalDesc:
         '로그인된 NetEase Cloud Music 클라이언트나 브라우저에서 cookie를 복사해 붙여넣으세요. 이 기기의 브라우저 저장소에만 보관됩니다',

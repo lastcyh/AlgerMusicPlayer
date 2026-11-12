@@ -83,13 +83,13 @@ export default {
     },
     vipBorrow: {
       section: 'VIP 音源の借用',
-      enableTitle: 'VIP 音源の借用を有効にする',
+      enableTitle: 'VIPアカウントで補完',
       enableDesc:
-        'メインアカウントで再生URLを取得できない場合のみ、保存したVIPトークンで取得します。プレイリスト・お気に入り・デイリー推薦はメインアカウントのままです',
+        'メインアカウントで再生URLを取得できない場合のみ、保存したVIPアカウントで公式APIから再取得します。優先順位：メイン → VIP → 下の音源設定',
       statusUnset: 'VIPトークン未登録',
       statusConnected: '登録済み：{name}（{level}）',
       statusInvalid: 'トークンが無効です。再登録してください',
-      statusOff: '無効です。借用リクエストは送信されません',
+      statusOff: '無効です。補完リクエストは送信されません',
       bind: 'トークンを登録',
       rebind: 'トークンを変更',
       verify: '確認',
@@ -97,9 +97,9 @@ export default {
       verifySuccess: 'トークンは有効です：{name}（{level}）',
       verifyFailed: 'トークンの確認に失敗しました。期限切れの可能性があります',
       cleared: 'VIP借用トークンを削除しました',
-      upgrade: '通常曲も借用してビットレートを上げる',
+      upgrade: '音質が不足する場合も補完',
       upgradeDesc:
-        'メインアカウントのビットレートが設定音質より低い場合、VIPトークンで再取得します（リクエストが1回増えます）',
+        'メインアカウントのビットレートが上の音質設定より低い場合、VIPアカウントで再取得します（リクエストが1回増えます）',
       modalTitle: 'VIP借用トークンを登録',
       modalDesc:
         'ログイン済みのNetEase Cloud Musicクライアントまたはブラウザからcookieをコピーして貼り付けてください。本機のブラウザストレージにのみ保存されます',

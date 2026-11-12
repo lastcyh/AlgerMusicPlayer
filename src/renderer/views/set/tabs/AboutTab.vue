@@ -27,17 +27,6 @@
         </div>
       </template>
     </setting-item>
-
-    <setting-item
-      :title="t('settings.about.author')"
-      :description="t('settings.about.authorDesc')"
-      clickable
-      @click="openAuthor"
-    >
-      <s-btn @click.stop="openAuthor">
-        <i class="ri-github-line mr-1"></i>{{ t('settings.about.gotoGithub') }}
-      </s-btn>
-    </setting-item>
   </setting-section>
 </template>
 
@@ -51,14 +40,16 @@ import { checkUpdate, UpdateResult } from '@/utils/update';
 
 import config from '../../../../../package.json';
 import { APP_UPDATE_STATUS, hasAvailableAppUpdate } from '../../../../shared/appUpdate';
-import { SETTINGS_DATA_KEY, SETTINGS_MESSAGE_KEY } from '../keys';
+import { SETTINGS_MESSAGE_KEY } from '../keys';
 import SBtn from '../SBtn.vue';
 import SettingItem from '../SettingItem.vue';
 import SettingSection from '../SettingSection.vue';
 
+/** 个人构建仓库，替代原作者链接 */
+const REPO_URL = 'https://github.com/lastcyh/AlgerMusicPlayer';
+
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const setData = inject(SETTINGS_DATA_KEY)!;
 const message = inject(SETTINGS_MESSAGE_KEY)!;
 
 const checking = ref(false);
@@ -140,7 +131,7 @@ const openReleasePage = () => {
     return;
   }
 
-  window.open(updateInfo.value.releaseInfo?.html_url || setData.value.authorUrl);
+  window.open(updateInfo.value.releaseInfo?.html_url || REPO_URL);
 };
 
 const openManualUpdatePage = async () => {
@@ -149,11 +140,7 @@ const openManualUpdatePage = async () => {
     return;
   }
 
-  window.open(updateInfo.value.releaseInfo?.html_url || setData.value.authorUrl);
-};
-
-const openAuthor = () => {
-  window.open(setData.value.authorUrl);
+  window.open(updateInfo.value.releaseInfo?.html_url || REPO_URL);
 };
 
 defineExpose({ checkForUpdates });

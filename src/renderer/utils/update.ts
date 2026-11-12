@@ -129,14 +129,8 @@ export const getLatestReleaseInfo = async (): Promise<GithubReleaseInfo | null> 
   try {
     const token = import.meta.env.VITE_GITHUB_TOKEN;
     const headers = {};
-    // 构建 API URL 列表
-    const apiUrls = [
-      // 原始地址
-      'https://api.github.com/repos/algerkong/AlgerMusicPlayer/releases/latest',
-
-      // 使用代理节点
-      'http://music.alger.fun/package.json'
-    ];
+    // 仓库内没有发布 release，天然不会提示跨仓库更新
+    const apiUrls = ['https://api.github.com/repos/lastcyh/AlgerMusicPlayer/releases/latest'];
 
     if (token) {
       headers['Authorization'] = `token ${token}`;

@@ -1,10 +1,10 @@
 {
   "name": "AlgerMusicPlayer",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "Alger Music Player",
-  "author": "Alger <algerkc@qq.com>",
+  "author": "local build",
   "main": "./out/main/index.js",
-  "homepage": "https://github.com/algerkong/AlgerMusicPlayer",
+  "homepage": "https://github.com/lastcyh/AlgerMusicPlayer",
   "scripts": {
     "prepare": "husky",
     "format": "prettier --write ./src",
@@ -137,7 +137,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "algerkong",
+        "owner": "lastcyh",
         "repo": "AlgerMusicPlayer"
       }
     ],
@@ -207,7 +207,7 @@
       ],
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
       "category": "Audio",
-      "maintainer": "Alger <algerkc@qq.com>"
+      "maintainer": "local build"
     },
     "nsis": {
       "oneClick": false,
