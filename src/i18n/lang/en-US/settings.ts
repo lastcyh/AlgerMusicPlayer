@@ -81,6 +81,40 @@ export default {
       dolby: 'Dolby Atmos',
       jymaster: 'Master'
     },
+    vipBorrow: {
+      section: 'VIP source borrowing',
+      enableTitle: 'Enable VIP source borrowing',
+      enableDesc:
+        'When the main account cannot get a playable URL, resolve it once with the stored VIP token. Playlists, likes and daily recommendations still use the main account',
+      statusUnset: 'No VIP token bound',
+      statusConnected: 'Bound: {name} ({level})',
+      statusInvalid: 'Token expired, please bind again',
+      statusOff: 'Disabled, no borrow request will be sent',
+      bind: 'Bind token',
+      rebind: 'Change token',
+      verify: 'Verify',
+      clear: 'Clear',
+      verifySuccess: 'Token valid: {name} ({level})',
+      verifyFailed: 'Token verification failed, it may have expired',
+      cleared: 'VIP borrowing token cleared',
+      upgrade: 'Also borrow to upgrade normal tracks',
+      upgradeDesc:
+        'When the main account returns a lower bitrate than the selected quality, resolve again with the VIP token (one extra request)',
+      modalTitle: 'Bind VIP borrowing token',
+      modalDesc:
+        'Copy the cookie from a logged-in NetEase Cloud Music client or browser and paste it below. It is stored only in this device browser storage',
+      modalPlaceholder: 'MUSIC_U=xxxxx; __csrf=xxxxx',
+      modalHelpScope: 'Used only to resolve playback URLs, your main account login stays untouched',
+      modalHelpExpire:
+        'Changing the password or signing out invalidates the token, bind again here if that happens',
+      save: 'Save and verify',
+      invalidFormat: 'Invalid token format, MUSIC_U is required',
+      cookieRequired: 'Please paste a token first',
+      level0: 'Free',
+      level10: 'Music package',
+      level11: 'Black vinyl VIP',
+      level110: 'Black vinyl SVIP'
+    },
     musicSources: 'Music Sources',
     musicSourcesDesc: 'Select music sources for song resolution',
     musicSourcesWarning: 'At least one music source must be selected',

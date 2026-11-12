@@ -1,114 +1,67 @@
-name: Build and Release
+name: Build Windows
 
+# 个人 fork 专用：只出 Windows x64 安装包，手动触发，产物走 artifact。
+# 本机不装依赖，全部构建在 GitHub runner 上完成。
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: mac-x64
-            os: macos-latest
-            build_command: npm run build:mac:x64
-          - id: mac-arm64
-            os: macos-latest
-            build_command: npm run build:mac:arm64
-          - id: windows
-            os: windows-latest
-            build_command: npm run build:win
-          - id: linux
-            os: ubuntu-latest
-            build_command: npm run build:linux
+    name: Windows x64
+    runs-on: windows-latest
+    timeout-minutes: 60
 
     steps:
-      - name: Check out Git repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
-      - name: Install Linux build dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+      - name: Build renderer and main
+        run: npm run build
 
-      - name: Build artifacts
-        run: ${{ matrix.build_command }}
+      - name: Package Windows x64 installer
+        run: npx electron-builder --win --x64 --publish never
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
-      - name: Prepare mac update metadata
-        if: startsWith(matrix.id, 'mac-')
-        run: rm -f dist/latest-mac.yml
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'out/main/index.js')) { throw 'out/main/index.js 缺失，主进程未构建' }
+          if (-not (Test-Path 'out/renderer/index.html')) { throw 'out/renderer/index.html 缺失，渲染层未构建' }
 
-      - name: Upload release bundle
+          # 关键校验：确认 VIP 借用代码真的进了 bundle，避免构建出"看起来成功"的旧包
+          $scripts = Get-ChildItem -Path 'out/renderer/assets' -Filter '*.js' -Recurse
+          if (-not $scripts) { throw '未找到渲染层 bundle' }
+          $hit = Select-String -Path $scripts.FullName -Pattern 'vipBorrow' -SimpleMatch -Quiet
+          if (-not $hit) { throw '渲染层 bundle 中缺少 vipBorrow，功能未打进产物' }
+
+          # 历史教训：路径被 shell 改写会注入坏 baseURL，这里兜底拦截
+          $broken = Select-String -Path $scripts.FullName -Pattern 'Program Files/Git' -SimpleMatch -Quiet
+          if ($broken) { throw 'bundle 中出现被 shell 改写的路径，构建环境有问题' }
+
+          $exe = Get-ChildItem -Path 'dist' -Filter '*.exe' -ErrorAction SilentlyContinue
+          if (-not $exe) { throw 'dist 下没有生成安装包' }
+          $exe | ForEach-Object { Write-Host ("安装包: {0} ({1:N1} MB)" -f $_.Name, ($_.Length / 1MB)) }
+
+      - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.id }}
+          name: AlgerMusicPlayer-win-x64
           if-no-files-found: error
+          retention-days: 30
           path: |
-            dist/*.dmg
-            dist/*.zip
             dist/*.exe
-            dist/*.deb
-            dist/*.rpm
-            dist/*.AppImage
-            dist/latest*.yml
-            dist/*.blockmap
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v4
-
-      - name: Get version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-      - name: Read release notes
-        run: |
-          NOTES=$(awk "/## \[v${{ env.VERSION }}\]/{p=1;print;next} /## \[v/{p=0}p" CHANGELOG.md)
-          echo "NOTES<<EOF" >> $GITHUB_ENV
-          echo "$NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: release-artifacts
-
-      - name: Prepare release files
-        run: |
-          mkdir -p release-upload
-          find release-artifacts -type f \
-            ! -name 'latest-mac-x64.yml' \
-            ! -name 'latest-mac-arm64.yml' \
-            -exec cp {} release-upload/ \;
-          node scripts/merge_latest_mac_yml.mjs \
-            release-artifacts/mac-x64/latest-mac-x64.yml \
-            release-artifacts/mac-arm64/latest-mac-arm64.yml \
-            release-upload/latest-mac.yml
-
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body: ${{ env.NOTES }}
-          draft: false
-          prerelease: false
-          files: release-upload/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            dist/*.exe.blockmap
+            dist/latest.yml

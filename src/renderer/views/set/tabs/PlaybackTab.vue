@@ -85,6 +85,8 @@
       </setting-item>
     </setting-section>
 
+    <vip-borrow-settings />
+
     <div
       class="mt-6 p-4 rounded-2xl bg-white dark:bg-neutral-900 border border-gray-100 dark:border-gray-800"
     >
@@ -119,6 +121,7 @@ import { useI18n } from 'vue-i18n';
 
 import AudioDeviceSettings from '@/components/settings/AudioDeviceSettings.vue';
 import MusicSourceSettings from '@/components/settings/MusicSourceSettings.vue';
+import VipBorrowSettings from '@/components/settings/VipBorrowSettings.vue';
 import { type Platform } from '@/types/music';
 import { isElectron } from '@/utils';
 import { LYRIC_CONFIG_CHANGE_EVENT, readLyricConfig, writeLyricConfig } from '@/utils/lyricConfig';

@@ -24,6 +24,16 @@ export function getLoginStatus() {
   return request.get('/login/status');
 }
 
+/**
+ * 用指定 cookie 校验登录态（VIP 借用令牌）。
+ * noLogin：令牌过期返回 301 时不要触发主账号登出。
+ */
+export function getLoginStatusWithCookie(cookie: string) {
+  return request.get('/login/status', {
+    params: { cookie, noLogin: true }
+  });
+}
+
 // 获取用户信息
 // /user/account
 export function getUserDetail() {

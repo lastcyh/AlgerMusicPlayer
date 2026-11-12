@@ -81,6 +81,40 @@ export default {
       dolby: '돌비 애트모스',
       jymaster: '초고화질 마스터'
     },
+    vipBorrow: {
+      section: 'VIP 음원 차용',
+      enableTitle: 'VIP 음원 차용 사용',
+      enableDesc:
+        '메인 계정으로 재생 주소를 받을 수 없을 때만 저장된 VIP 토큰으로 다시 받아옵니다. 플레이리스트·좋아요·일일 추천은 메인 계정을 그대로 사용합니다',
+      statusUnset: 'VIP 토큰이 등록되지 않았습니다',
+      statusConnected: '등록됨: {name}({level})',
+      statusInvalid: '토큰이 만료되었습니다. 다시 등록해 주세요',
+      statusOff: '꺼져 있어 차용 요청을 보내지 않습니다',
+      bind: '토큰 등록',
+      rebind: '토큰 변경',
+      verify: '확인',
+      clear: '삭제',
+      verifySuccess: '토큰이 유효합니다: {name}({level})',
+      verifyFailed: '토큰 확인에 실패했습니다. 만료되었을 수 있습니다',
+      cleared: 'VIP 차용 토큰을 삭제했습니다',
+      upgrade: '일반 곡도 차용해 비트레이트 올리기',
+      upgradeDesc:
+        '메인 계정의 비트레이트가 설정 음질보다 낮으면 VIP 토큰으로 다시 받아옵니다(요청 1회 추가)',
+      modalTitle: 'VIP 차용 토큰 등록',
+      modalDesc:
+        '로그인된 NetEase Cloud Music 클라이언트나 브라우저에서 cookie를 복사해 붙여넣으세요. 이 기기의 브라우저 저장소에만 보관됩니다',
+      modalPlaceholder: 'MUSIC_U=xxxxx; __csrf=xxxxx',
+      modalHelpScope: '재생 주소를 받을 때만 사용하며 메인 계정 로그인 상태는 건드리지 않습니다',
+      modalHelpExpire:
+        '비밀번호 변경이나 로그아웃 시 토큰이 만료됩니다. 그때 여기서 다시 등록하세요',
+      save: '저장 후 확인',
+      invalidFormat: '토큰 형식이 올바르지 않습니다. MUSIC_U가 필요합니다',
+      cookieRequired: '먼저 토큰을 붙여넣어 주세요',
+      level0: '무료',
+      level10: '뮤직 패키지',
+      level11: '블랙바이닐 VIP',
+      level110: '블랙바이닐 SVIP'
+    },
     musicSources: '음원 설정',
     musicSourcesDesc: '음악 해석에 사용할 음원 플랫폼 선택',
     musicSourcesWarning: '최소 하나의 음원 플랫폼을 선택해야 합니다',

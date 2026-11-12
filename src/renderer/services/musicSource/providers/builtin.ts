@@ -5,11 +5,20 @@
  * 归一成 MediaSource、保留原有的超时与验证语义。
  */
 import { parseFromGDMusic } from '@/api/gdmusic';
-import { getMusicUrl } from '@/api/music';
+import { getMusicUrl, getMusicUrlByVipBorrow } from '@/api/music';
 import { parseFromCustomApi } from '@/api/parseFromCustomApi';
 import { useSettingsStore } from '@/store';
 import type { SongResult } from '@/types/music';
 import type { PluginMediaSource } from '@/types/musicSourcePlugin';
+import {
+  getVipCookie,
+  isVipBorrowReady,
+  normalizeBitrate,
+  pickPlayableDetail,
+  qualityToBitrate,
+  saveVipBorrow,
+  shouldUpgradeNormalTracks
+} from '@/utils/vipBorrow';
 
 import { validatePluginHttpUrl } from '../../../../shared/musicSourcePlugin';
 import type { MusicSourceProvider } from '../types';
@@ -35,6 +44,10 @@ const extractLegacyUrl = (result: unknown): string | undefined => {
 };
 
 // ─── 网易云官方直连（默认第一位，含 VIP 下载口与试听判定） ────────────────
+//
+// 双账号策略：主账号负责登录态与全部接口；当主账号取不到播放地址，或
+// （可选）返回码率低于设定档位时，再用另存的 VIP 令牌重新取一次地址。
+// 借用请求显式带 cookie，不与主账号 cookie 混合。
 
 export const neteaseProvider: MusicSourceProvider = {
   key: 'netease',
@@ -44,15 +57,51 @@ export const neteaseProvider: MusicSourceProvider = {
   color: '#ec4141',
   builtin: true,
   available: true,
-  resolve: async (song: SongResult, _quality: string, options) => {
-    // 下载场景走 VIP 下载口（getMusicUrl 内部按 isDownloaded 判定）
-    const res = await getMusicUrl(song.id as number, Boolean(options?.isDownload));
-    const detail = res?.data?.data?.[0];
-    if (!detail?.url || detail.freeTrialInfo) return null;
-    return toMediaSource(detail.url, {
-      format: detail.type,
-      br: detail.br ? Number(detail.br) * 1000 : undefined
-    });
+  resolve: async (song: SongResult, quality: string, options) => {
+    const songId = Number(song.id);
+    const isDownload = Boolean(options?.isDownload);
+    const targetQuality = quality || 'higher';
+
+    const buildMedia = (detail: any) =>
+      toMediaSource(detail?.url, {
+        format: detail?.type,
+        br: normalizeBitrate(detail?.br) || undefined
+      });
+
+    // 1. 主账号取址（登录态由 request 拦截器自动带上）
+    let mainDetail: any = null;
+    try {
+      mainDetail = pickPlayableDetail(await getMusicUrl(songId, isDownload));
+    } catch (error) {
+      console.warn('[netease] 主账号取址失败:', (error as Error)?.message);
+    }
+
+    const mainMedia = mainDetail ? buildMedia(mainDetail) : null;
+
+    // 2. 未启用借用，或主账号已经够用 → 直接返回
+    if (!isVipBorrowReady()) return mainMedia;
+    if (mainMedia) {
+      const enoughBitrate =
+        !shouldUpgradeNormalTracks() ||
+        normalizeBitrate(mainDetail?.br) >= qualityToBitrate(targetQuality);
+      if (enoughBitrate) return mainMedia;
+    }
+
+    // 3. 借用 VIP 令牌：从设定档位逐级降档取址
+    const { detail, authFailed } = await getMusicUrlByVipBorrow(
+      songId,
+      getVipCookie(),
+      targetQuality,
+      isDownload
+    );
+
+    if (authFailed) {
+      saveVipBorrow({ verified: false });
+      console.warn('[netease] VIP 借用令牌已失效，请在设置页重新绑定');
+      return mainMedia;
+    }
+
+    return (detail ? buildMedia(detail) : null) ?? mainMedia;
   }
 };
 

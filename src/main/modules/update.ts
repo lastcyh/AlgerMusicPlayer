@@ -18,12 +18,22 @@ type CheckUpdateOptions = {
   manual?: boolean;
 };
 
+/**
+ * 本仓库是个人 fork，appId 与上游一致；若开自动更新，官方 release 会把
+ * 本地改动整体覆盖掉。打包版默认关闭，需要恢复时把这里改成 false。
+ */
+const AUTO_UPDATE_DISABLED = true;
+
 let updateState: AppUpdateState = createDefaultAppUpdateState(app.getVersion());
 let isInitialized = false;
 let checkForUpdatesPromise: Promise<AppUpdateState> | null = null;
 let downloadUpdatePromise: Promise<AppUpdateState> | null = null;
 
 const isAutoUpdateSupported = (): boolean => {
+  if (AUTO_UPDATE_DISABLED) {
+    return false;
+  }
+
   // if (!app.isPackaged) {
   //   return false;
   // }
@@ -74,6 +84,10 @@ const resetUpdateState = () => {
 };
 
 const getUnsupportedMessage = () => {
+  if (AUTO_UPDATE_DISABLED) {
+    return '当前为个人定制版本，已关闭自动更新，请自行构建最新安装包';
+  }
+
   if (!app.isPackaged) {
     return '当前环境为开发模式，自动更新仅在打包后的应用内可用';
   }

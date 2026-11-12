@@ -4,6 +4,7 @@ import { useSettingsStore, useUserStore } from '@/store';
 import type { ILyric } from '@/types/lyric';
 import type { SongResult } from '@/types/music';
 import request from '@/utils/request';
+import { normalizeBitrate, pickPlayableDetail, QUALITY_LADDER } from '@/utils/vipBorrow';
 
 type MusicParseResult = {
   data: {
@@ -30,24 +31,46 @@ export const getMusicQualityDetail = (id: number) => {
   return request.get('/song/music/detail', { params: { id } });
 };
 
+export type GetMusicUrlOptions = {
+  /** 显式指定的 cookie（VIP 借用），缺省沿用主账号登录态 */
+  cookie?: string;
+  /** 覆写音质档位，缺省用设置里的 musicQuality */
+  quality?: string;
+};
+
+/** lossless 走 aac 容器、其余走 flac，沿用原有映射 */
+const resolveEncodeType = (quality?: string) => (quality === 'lossless' ? 'aac' : 'flac');
+
 // 根据音乐Id获取音乐播放URl
-export const getMusicUrl = async (id: number, isDownloaded: boolean = false) => {
+export const getMusicUrl = async (
+  id: number,
+  isDownloaded: boolean = false,
+  options: GetMusicUrlOptions = {}
+) => {
   const userStore = useUserStore();
   const settingStore = useSettingsStore();
-  // 判断是否登录
+  const quality = options.quality || settingStore.setData.musicQuality || 'higher';
+  const explicitCookie = options.cookie?.trim();
+  // 借用令牌过期时接口可能返回 301，带 noLogin 可避免拦截器把主账号登出
+  const baseParams = {
+    level: quality,
+    encodeType: resolveEncodeType(quality),
+    ...(explicitCookie ? { noLogin: true } : {})
+  };
+
+  // 下载走 VIP 下载口：主账号本身是会员，或显式借用 VIP 令牌
+  const canUseDownloadEndpoint =
+    isDownloaded &&
+    (explicitCookie ? true : Boolean(userStore.user && userStore.user.vipType !== 0));
   try {
-    if (userStore.user && isDownloaded && userStore.user.vipType !== 0) {
-      const url = '/song/download/url/v1';
-      const res = await request.get(url, {
-        params: {
-          id,
-          level: settingStore.setData.musicQuality || 'higher',
-          encodeType: settingStore.setData.musicQuality == 'lossless' ? 'aac' : 'flac',
-          cookie: `${localStorage.getItem('token')} os=pc;`
-        }
+    if (canUseDownloadEndpoint) {
+      const mainCookie = localStorage.getItem('token') || '';
+      const cookie = explicitCookie ? `${explicitCookie} os=pc;` : `${mainCookie} os=pc;`;
+      const res = await request.get('/song/download/url/v1', {
+        params: { id, ...baseParams, cookie }
       });
 
-      if (res.data.data.url) {
+      if (res.data?.data?.url) {
         return { data: { data: [{ ...res.data.data }] } };
       }
     }
@@ -58,10 +81,51 @@ export const getMusicUrl = async (id: number, isDownloaded: boolean = false) => 
   return await request.get('/song/url/v1', {
     params: {
       id,
-      level: settingStore.setData.musicQuality || 'higher',
-      encodeType: settingStore.setData.musicQuality == 'lossless' ? 'aac' : 'flac'
+      ...baseParams,
+      ...(explicitCookie ? { cookie: explicitCookie } : {})
     }
   });
+};
+
+export type VipLadderResult = { detail: any | null; authFailed: boolean };
+
+const isAuthFailureCode = (value: unknown) => [301, 401, 403].includes(Number(value));
+
+const isAuthFailureError = (error: any) =>
+  isAuthFailureCode(error?.response?.status) ||
+  isAuthFailureCode(error?.response?.data?.code) ||
+  isAuthFailureCode(error?.response?.data?.data?.code);
+
+/**
+ * 借用 VIP 令牌取址：从设定档位开始逐级向下试，取到哪档算哪档。
+ * 等价于"自己就是该等级会员"，避免凭空猜会员可用音质。
+ */
+export const getMusicUrlByVipBorrow = async (
+  id: number,
+  cookie: string,
+  startQuality: string,
+  isDownloaded: boolean = false
+): Promise<VipLadderResult> => {
+  const startIndex = Math.max(0, (QUALITY_LADDER as readonly string[]).indexOf(startQuality));
+
+  for (let index = startIndex; index < QUALITY_LADDER.length; index += 1) {
+    const level = QUALITY_LADDER[index];
+    try {
+      const res = await getMusicUrl(id, isDownloaded, { cookie, quality: level });
+      const detail = pickPlayableDetail(res);
+      if (detail) {
+        return { detail: { ...detail, br: normalizeBitrate(detail.br) }, authFailed: false };
+      }
+
+      const code = res?.data?.code ?? res?.data?.data?.code;
+      if (isAuthFailureCode(code)) return { detail: null, authFailed: true };
+    } catch (error) {
+      if (isAuthFailureError(error)) return { detail: null, authFailed: true };
+      // 单档失败不阻断后续降档
+    }
+  }
+
+  return { detail: null, authFailed: false };
 };
 
 // 获取歌曲详情

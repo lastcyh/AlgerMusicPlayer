@@ -81,6 +81,40 @@ export default {
       dolby: 'Dolby Atmos',
       jymaster: '超高解像度マスター'
     },
+    vipBorrow: {
+      section: 'VIP 音源の借用',
+      enableTitle: 'VIP 音源の借用を有効にする',
+      enableDesc:
+        'メインアカウントで再生URLを取得できない場合のみ、保存したVIPトークンで取得します。プレイリスト・お気に入り・デイリー推薦はメインアカウントのままです',
+      statusUnset: 'VIPトークン未登録',
+      statusConnected: '登録済み：{name}（{level}）',
+      statusInvalid: 'トークンが無効です。再登録してください',
+      statusOff: '無効です。借用リクエストは送信されません',
+      bind: 'トークンを登録',
+      rebind: 'トークンを変更',
+      verify: '確認',
+      clear: '削除',
+      verifySuccess: 'トークンは有効です：{name}（{level}）',
+      verifyFailed: 'トークンの確認に失敗しました。期限切れの可能性があります',
+      cleared: 'VIP借用トークンを削除しました',
+      upgrade: '通常曲も借用してビットレートを上げる',
+      upgradeDesc:
+        'メインアカウントのビットレートが設定音質より低い場合、VIPトークンで再取得します（リクエストが1回増えます）',
+      modalTitle: 'VIP借用トークンを登録',
+      modalDesc:
+        'ログイン済みのNetEase Cloud Musicクライアントまたはブラウザからcookieをコピーして貼り付けてください。本機のブラウザストレージにのみ保存されます',
+      modalPlaceholder: 'MUSIC_U=xxxxx; __csrf=xxxxx',
+      modalHelpScope: '再生URLの取得にのみ使用し、メインアカウントのログイン状態は変更しません',
+      modalHelpExpire:
+        'パスワード変更やログアウトでトークンは無効になります。その場合はここで再登録してください',
+      save: '保存して確認',
+      invalidFormat: 'トークンの形式が正しくありません。MUSIC_U が必要です',
+      cookieRequired: '先にトークンを貼り付けてください',
+      level0: '無料',
+      level10: 'ミュージックパック',
+      level11: '黒膠VIP',
+      level110: '黒膠SVIP'
+    },
     musicSources: '音源設定',
     musicSourcesDesc: '音楽解析に使用する音源プラットフォームを選択',
     musicSourcesWarning: '少なくとも1つの音源プラットフォームを選択する必要があります',
