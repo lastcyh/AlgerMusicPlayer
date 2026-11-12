@@ -1,9 +1,7 @@
 name: Deploy Web
 
 on:
-  push:
-    branches:
-      - main # 或者您的主分支名称
+  # 个人 fork 没有原作者的服务器密钥，保留手动触发即可，避免每次推送 main 都红一片
   workflow_dispatch: # 允许手动触发
 
 jobs:
