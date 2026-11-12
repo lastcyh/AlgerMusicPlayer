@@ -4,6 +4,10 @@ name: Build Windows
 # 本机不装依赖，全部构建在 GitHub runner 上完成。
 on:
   workflow_dispatch:
+  # 默认分支保持与上游一致，手动构建走打标签：git tag build-1 && git push origin build-1
+  push:
+    tags:
+      - 'build-*'
 
 concurrency:
   group: build-windows-${{ github.ref }}
@@ -31,7 +35,8 @@ jobs:
         run: npm run build
 
       - name: Package Windows x64 installer
-        run: npx electron-builder --win --x64 --publish never
+        # -c.win.target=nsis 覆盖 package.json 里的三架构列表，只出一个 x64 包
+        run: npx electron-builder --win --x64 -c.win.target=nsis --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
